@@ -1,17 +1,6 @@
 #!/usr/bin/env ruby
 
-require "bundler/inline"
-
-gemfile do
-  source "https://rubygems.org"
-  gem "colorize"
-  gem "dotenv"
-  gem "httparty"
-end
-
-require "colorize"
-require "dotenv/load"
-require "io/console"
+require "httparty"
 
 FUNCTIONS = [
   {
@@ -157,13 +146,25 @@ def chat_response_for(
 end
 
 if $0 == __FILE__
+  require "bundler/inline"
+
+  gemfile do
+    source "https://rubygems.org"
+    gem "colorize"
+    gem "dotenv"
+    gem "httparty"
+  end
+
+  require "dotenv/load"
+  require "colorize"
+
   messages = []
 
   puts "Welcome to ChatGTP. Type any message to talk with ChatGPT. Type 'exit' to quit. Type 'dump' to dump this conversation to JSON."
 
   loop do
     print("me> ".colorize(:red))
-    message = $stdin.cooked(&:gets).chomp
+    message = gets.chomp
 
     case message
     when "exit", "quit", "q", "\\q"
