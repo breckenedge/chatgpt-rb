@@ -52,10 +52,18 @@ FUNCTIONS = [
   }
 ]
 
+def api_key
+  ENV.fetch("OPEN_AI_KEY")
+end
+
+def self.model
+  ENV.fetch("OPEN_AI_MODEL", "gpt-3.5-turbo")
+end
+
 def chat_response_for(
   messages = [],
-  api_key: ENV.fetch("OPEN_AI_KEY"),
-  model: ENV.fetch("OPEN_AI_MODEL", "gpt-3.5-turbo"),
+  api_key: self.api_key,
+  model: self.model,
   functions: FUNCTIONS,
   temperature: 0.7,
   max_tokens: 1024,
@@ -159,6 +167,8 @@ if $0 == __FILE__
   require "dotenv/load"
   require "colorize"
   require "reline"
+
+  api_key
 
   begin
     stty_save = `stty -g`.chomp
