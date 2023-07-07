@@ -153,29 +153,39 @@ if $0 == __FILE__
     gem "colorize"
     gem "dotenv"
     gem "httparty"
+    gem "reline"
   end
 
   require "dotenv/load"
   require "colorize"
+  require "reline"
 
-  messages = []
+  begin
+    stty_save = `stty -g`.chomp
+  rescue
+  end
 
-  puts "Welcome to ChatGTP. Type any message to talk with ChatGPT. Type 'exit' to quit. Type 'dump' to dump this conversation to JSON."
+  begin
+    puts "Welcome to ChatGTP. Type any message to talk with ChatGPT. Type 'exit' to quit. Type 'dump' to dump this conversation to JSON."
 
-  loop do
-    print("me> ".colorize(:red))
-    message = gets.chomp
+    messages = []
 
-    case message
-    when "exit", "quit", "q", "\\q"
-      exit
-    when "dump"
-      puts "#{':'.colorize(:blue)} #{messages.to_json}"
-    else
-      messages << { role: "user", content: message }
-      print("ai> ".colorize(:green))
-      chat_response_for(messages) { |fragment| print(fragment) }
-      puts
+    while message = Reline.readline("me> ".colorize(:red), true) do
+      case message.chomp
+      when "exit", "quit", "q", "\\q"
+        exit
+      when "dump"
+        puts "dump> ".colorize(:blue) + messages.to_json
+      else
+        messages << { role: "user", content: message }
+        print("ai> ".colorize(:yellow))
+        chat_response_for(messages) { |fragment| print(fragment) }
+        puts
+      end
     end
+  rescue Interrupt
+    puts "^C"
+    `stty #{stty_save}` if stty_save
+    exit
   end
 end
