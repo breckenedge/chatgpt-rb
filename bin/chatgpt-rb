@@ -1,9 +1,5 @@
 #!/usr/bin/env ruby
 
-require "bundler"
-
-Bundler.setup
-
 require "dotenv/load"
 require "colorize"
 require "reline"

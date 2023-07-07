@@ -10,8 +10,8 @@ Gem::Specification.new do |spec|
   spec.files         = Dir["lib/**/*", "bin/**/*"]
   spec.require_paths = ["lib"]
   spec.executables << "chatgpt-rb"
-  spec.add_dependency "httparty", ">= 0.21.0"
-  spec.add_dependency "colorize", ">= 0.6.0"
-  spec.add_dependency "dotenv", ">= 2.8.1"
-  spec.add_dependency "reline", ">= 0.3.5"
+  spec.add_dependency "httparty", "~> 0.21"
+  spec.add_dependency "colorize", "~> 0.6"
+  spec.add_dependency "dotenv", "~> 2.8"
+  spec.add_dependency "reline", "~> 0.3"
 end
