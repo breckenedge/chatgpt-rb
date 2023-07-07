@@ -10,8 +10,6 @@ Install this gem via the command line:
 gem install chatgpt-rb
 ```
 
-If you want to use the CLI, make sure to set an `OPEN_AI_KEY` environment variable, then run `chatgpt-rb` to launch the CLI:
-
 ## CLI
 
 Set the `OPEN_AI_KEY` environment variable, then run the `chatgpt-rb` executable:
