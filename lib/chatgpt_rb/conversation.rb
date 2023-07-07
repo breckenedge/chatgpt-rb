@@ -9,25 +9,44 @@ require "httparty"
 
 module ChatgptRb
   class Conversation
-    attr_reader :api_key, :model, :functions
+    attr_reader :api_key, :model, :functions, :temperature, :max_tokens, :top_p, :frequency_penalty, :presence_penalty, :messages
 
-    def initialize(api_key:, model: "gpt-3.5-turbo", functions: [])
+    # @param api_key [String]
+    # @param model [String]
+    # @param functions [Array<Hash>]
+    # @param temperature [Float]
+    # @param max_tokens [Integer]
+    # @param top_p [Float]
+    # @param frequency_penalty [Float]
+    # @param presence_penalty [Float]
+    # @param messages [Array<Hash>]
+    # @param prompt [String, nil] instructions that the model can use to inform its responses, for example: "Act like a sullen teenager."
+    def initialize(api_key:, model: "gpt-3.5-turbo", functions: [], temperature: 0.7, max_tokens: 1024, top_p: 1.0, frequency_penalty: 0.0, presence_penalty: 0.0, messages: [], prompt: nil)
       @api_key = api_key
       @model = model
       @functions = functions
-      @messages = []
+      @temperature = temperature
+      @max_tokens = max_tokens
+      @top_p = top_p
+      @frequency_penalty = frequency_penalty
+      @presence_penalty = presence_penalty
+      @messages = messages
+      @messages << { role: "system", content: prompt } if prompt
     end
+
+    # @param content [String]
+    def ask(content, &block)
+      @messages << { role: "user", content: }
+      get_next_response(&block)
+    end
+
+    private
 
     def <<(message)
       @messages << message
     end
 
-    def ask(message)
-      @messages << { role: "user", content: message }
-      get_next_response
-    end
-
-    def get_next_response(temperature: 0.7, max_tokens: 1024, top_p: 1, frequency_penalty: 0, presence_penalty: 0, functions: [], &block)
+    def get_next_response(&block)
       streamed_content = ""
       streamed_arguments = ""
       streamed_role = ""
