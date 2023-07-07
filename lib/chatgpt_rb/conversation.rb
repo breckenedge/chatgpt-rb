@@ -64,34 +64,36 @@ module ChatgptRb
           stream: block_given?,
         }.tap { |hash| hash[:functions] = functions.map { |hash| hash.except(:implementation) } unless functions.empty? }.to_json,
       ) do |fragment|
-        fragment.each_line do |line|
-          next if line.nil?
-          next if line == "\n"
-          break if line == "data: [DONE]\n"
+        if block_given?
+          fragment.each_line do |line|
+            next if line.nil?
+            next if line == "\n"
+            break if line == "data: [DONE]\n"
 
-          line_without_prefix = line.gsub(/^data: /, "")
-          json = JSON.parse(line_without_prefix)
+            line_without_prefix = line.gsub(/^data: /, "")
+            json = JSON.parse(line_without_prefix)
 
-          break if json.dig("choices", 0, "finish_reason")
+            break if json.dig("choices", 0, "finish_reason")
 
-          if (function_name = json.dig("choices", 0, "delta", "function_call", "name"))
-            streamed_function = function_name
-            next
+            if (function_name = json.dig("choices", 0, "delta", "function_call", "name"))
+              streamed_function = function_name
+              next
+            end
+
+            if (role = json.dig("choices", 0, "delta", "role"))
+              streamed_role = role
+              next
+            end
+
+            if content = json.dig("choices", 0, "delta", "content")
+              yield content unless line_without_prefix.empty?
+              streamed_content << content
+            elsif arguments = json.dig("choices", 0, "delta", "function_call", "arguments")
+              streamed_arguments << arguments
+            end
+          rescue => e
+            error_buffer << "Error: #{e}"
           end
-
-          if (role = json.dig("choices", 0, "delta", "role"))
-            streamed_role = role
-            next
-          end
-
-          if content = json.dig("choices", 0, "delta", "content")
-            yield content unless line_without_prefix.empty?
-            streamed_content << content
-          elsif arguments = json.dig("choices", 0, "delta", "function_call", "arguments")
-            streamed_arguments << arguments
-          end
-        rescue => e
-          error_buffer << "Error: #{e}"
         end
       end
 

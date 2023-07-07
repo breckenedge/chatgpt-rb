@@ -68,7 +68,7 @@ functions = [
       required: ["location"],
     },
     implementation: ->(location:, unit: "celcius") {
-      # Your code goes here
+      # Your code goes here. It gets passed back to ChatGPT.
       {
         temperature: 22,
         unit: unit || "celsius",
