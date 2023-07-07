@@ -1,10 +1,3 @@
-require "bundler/inline"
-
-gemfile do
-  source "https://rubygems.org"
-  gem "httparty"
-end
-
 require "httparty"
 
 module ChatgptRb
