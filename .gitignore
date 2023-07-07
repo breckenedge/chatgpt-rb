@@ -1,1 +1,4 @@
 .env
+Gemfile.lock
+.tool-versions
+*.gem

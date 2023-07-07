@@ -1,0 +1,42 @@
+#!/usr/bin/env ruby
+
+require "bundler"
+
+Bundler.setup
+
+require "dotenv/load"
+require "colorize"
+require "reline"
+require_relative "./../lib/chatgpt_rb"
+
+begin
+  stty_save = `stty -g`.chomp
+rescue
+end
+
+begin
+  puts "Welcome to ChatGTP. Type any message to talk with ChatGPT. Type 'exit' to quit. Type 'dump' to dump this conversation to JSON."
+
+  conversation = ChatgptRb::Conversation.new(
+    api_key: ENV.fetch("OPEN_AI_KEY"),
+    model: ENV.fetch("OPEN_AI_MODEL", "gpt-3.5-turbo")
+  )
+
+  while message = Reline.readline("me> ".colorize(:red), true) do
+    case message.chomp
+    when "exit", "quit", "q", "\\q"
+      exit
+    when "dump"
+      puts "dump> ".colorize(:blue) + conversation.to_json
+    else
+      conversation << { role: "user", content: message }
+      print("ai> ".colorize(:yellow))
+      conversation.get_next_response { |fragment| print(fragment) }
+      puts
+    end
+  end
+rescue Interrupt
+  puts "^C"
+  `stty #{stty_save}` if stty_save
+  exit
+end
