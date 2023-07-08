@@ -1,0 +1,17 @@
+#!/usr/bin/env ruby
+
+require "listen"
+
+directory_to_watch = Dir.pwd
+
+listener = Listen.to(directory_to_watch) do |modified, added, removed|
+  system("rspec")
+end
+
+listener.start
+puts "Watching #{directory_to_watch} for changes..."
+
+# Stop the listener when the process is terminated
+Signal.trap("INT") { listener.stop }
+Signal.trap("TERM") { listener.stop }
+sleep

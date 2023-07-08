@@ -1,12 +1,19 @@
 require "httparty"
+require_relative "./function"
+require_relative "./dsl/conversation"
 
 module ChatgptRb
   class Conversation
-    attr_reader :api_key, :model, :functions, :temperature, :max_tokens, :top_p, :frequency_penalty, :presence_penalty, :messages
+    include HTTParty
+
+    base_uri "https://api.openai.com"
+
+    attr_accessor :api_key, :model, :functions, :temperature, :max_tokens, :top_p, :frequency_penalty, :presence_penalty, :prompt
+    attr_reader :messages
 
     # @param api_key [String]
     # @param model [String]
-    # @param functions [Array<Hash>]
+    # @param functions [Array<Hash>, Array<ChatgptRb::Function>]
     # @param temperature [Float]
     # @param max_tokens [Integer]
     # @param top_p [Float]
@@ -14,23 +21,41 @@ module ChatgptRb
     # @param presence_penalty [Float]
     # @param messages [Array<Hash>]
     # @param prompt [String, nil] instructions that the model can use to inform its responses, for example: "Act like a sullen teenager."
-    def initialize(api_key:, model: "gpt-3.5-turbo", functions: [], temperature: 0.7, max_tokens: 1024, top_p: 1.0, frequency_penalty: 0.0, presence_penalty: 0.0, messages: [], prompt: nil)
+    def initialize(api_key: nil, model: "gpt-3.5-turbo", functions: [], temperature: 0.7, max_tokens: 1024, top_p: 1.0, frequency_penalty: 0.0, presence_penalty: 0.0, messages: [], prompt: nil, &configuration)
       @api_key = api_key
       @model = model
-      @functions = functions
+      @functions = functions.each_with_object({}) do |function, hash|
+        func = function.is_a?(ChatgptRb::Function) ? function : ChatgptRb::Function.new(**function)
+        hash[func.name] = func
+      end
       @temperature = temperature
       @max_tokens = max_tokens
       @top_p = top_p
       @frequency_penalty = frequency_penalty
       @presence_penalty = presence_penalty
       @messages = messages
+      @prompt = prompt
+      ChatgptRb::DSL::Conversation.configure(self, &configuration) if block_given?
       @messages << { role: "system", content: prompt } if prompt
     end
 
     # @param content [String]
+    # @yieldparam [String] the response, but streamed
+    # @return [String] the response
     def ask(content, &block)
       @messages << { role: "user", content: }
       get_next_response(&block)
+    end
+
+    # @param content [String]
+    # @param function [ChatgptRb::Function] temporarily enhance the next response with the provided function
+    # @yieldparam [String] the response, but streamed
+    # @return [String] the response
+    def ask_with_function(content, function, &block)
+      function_was = functions[function.name]
+      functions[function.name] = function
+      get_next_response(content, &block)
+      functions[function.name] = function_was
     end
 
     private
@@ -46,23 +71,29 @@ module ChatgptRb
       streamed_function = ""
       error_buffer = []
 
-      response = HTTParty.post(
-        "https://api.openai.com/v1/chat/completions",
+      body = {
+        model:,
+        messages: @messages,
+        temperature:,
+        max_tokens:,
+        top_p:,
+        frequency_penalty:,
+        presence_penalty:,
+        stream: block_given?,
+      }.tap do |hash|
+        hash[:functions] = functions.values.map(&:as_json) unless functions.empty?
+      end
+
+      response = self.class.post(
+        "/v1/chat/completions",
         steam_body: block_given?,
         headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer #{api_key}",
+          "Content-Type" => "application/json",
+          "Authorization" => "Bearer #{api_key}",
+          "Accept" => "application/json",
+          "User-Agent" => "Ruby/chatgpt-rb",
         },
-        body: {
-          model:,
-          messages: @messages,
-          temperature:,
-          max_tokens:,
-          top_p:,
-          frequency_penalty:,
-          presence_penalty:,
-          stream: block_given?,
-        }.tap { |hash| hash[:functions] = functions.map { |hash| hash.except(:implementation) } unless functions.empty? }.to_json,
+        body: body.to_json,
       ) do |fragment|
         if block_given?
           fragment.each_line do |line|
@@ -113,13 +144,12 @@ module ChatgptRb
         function_args = @messages.last["function_call"]
         function_name = function_args.fetch("name")
         arguments = JSON.parse(function_args.fetch("arguments"))
-
-        function = functions.find { |function| function[:name] == function_name }
-        content = function.fetch(:implementation).call(**arguments.transform_keys(&:to_sym))
+        function = functions[function_name]
+        content = function.implementation.call(**arguments.transform_keys(&:to_sym))
 
         @messages << { role: "function", name: function_name, content: content.to_json }
 
-        get_next_response(functions:, api_key:, model:, temperature:, max_tokens:, top_p:, frequency_penalty:, presence_penalty:, &block)
+        get_next_response(&block)
       end
     end
   end

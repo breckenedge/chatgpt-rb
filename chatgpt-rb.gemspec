@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name          = "chatgpt-rb"
-  spec.version       = "0.1.0"
+  spec.version       = "0.1.1"
   spec.authors       = ["Aaron Breckenridge"]
   spec.email         = ["aaron@breckridge.dev"]
   spec.summary       = "A gem for interacting with the ChatGPT API"
@@ -14,4 +14,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "colorize", "~> 0.6"
   spec.add_dependency "dotenv", "~> 2.8"
   spec.add_dependency "reline", "~> 0.3"
+  spec.add_development_dependency "rspec"
+  spec.add_development_dependency "listen"
+  spec.add_development_dependency "webmock"
 end
