@@ -1,5 +1,7 @@
 # ChatgptRb
 
+[![Specs](https://github.com/breckenedge/chatgpt-rb/actions/workflows/spec.yml/badge.svg)](https://github.com/breckenedge/chatgpt-rb/actions/workflows/spec.yml)
+
 This is a library and CLI for interacting with the ChatGPT API from Ruby.
 
 ## Installation and Setup
