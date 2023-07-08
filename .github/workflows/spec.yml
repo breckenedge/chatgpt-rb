@@ -1,4 +1,4 @@
-name: Run Specs
+name: Specs
 
 on: [push, pull_request]
 
