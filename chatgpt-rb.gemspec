@@ -14,6 +14,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "colorize", "~> 0.6"
   spec.add_dependency "dotenv", "~> 2.8"
   spec.add_dependency "reline", "~> 0.3"
+  spec.add_dependency "json-schema", "~> 4.0"
   spec.add_development_dependency "rspec"
   spec.add_development_dependency "listen"
   spec.add_development_dependency "webmock"

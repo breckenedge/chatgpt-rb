@@ -1,4 +1,5 @@
 require "httparty"
+require "json-schema"
 require_relative "./function"
 require_relative "./dsl/conversation"
 
@@ -64,7 +65,18 @@ module ChatgptRb
       @messages << message
     end
 
+    # Ensure that each function's argument declarations conform to the JSON Schema
+    # See https://github.com/voxpupuli/json-schema/
+    def validate_functions!
+      metaschema = JSON::Validator.validator_for_name("draft4").metaschema
+      functions.values.each do |function|
+        raise ArgumentError, "Invalid function declaration for #{function.name}: #{function.as_json[:parameters]}" unless JSON::Validator.validate(metaschema, function.as_json[:parameters])
+      end
+    end
+
     def get_next_response(&block)
+      validate_functions!
+
       streamed_content = ""
       streamed_arguments = ""
       streamed_role = ""
