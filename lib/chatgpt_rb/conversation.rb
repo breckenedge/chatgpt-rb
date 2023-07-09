@@ -70,7 +70,7 @@ module ChatgptRb
     def validate_functions!
       metaschema = JSON::Validator.validator_for_name("draft4").metaschema
       functions.values.each do |function|
-        raise ArgumentError, "Invalid function declaration for #{function.name}: #{function.as_json[:parameters]}" unless JSON::Validator.validate(metaschema, function.as_json[:parameters])
+        raise ArgumentError, "Invalid function declaration for #{function.name}: #{function.as_json}" unless JSON::Validator.validate(metaschema, function.as_json)
       end
     end
 
