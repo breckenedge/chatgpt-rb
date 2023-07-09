@@ -113,7 +113,10 @@ module ChatgptRb
             next if line == "\n"
             break if line == "data: [DONE]\n"
 
-            line_without_prefix = line.gsub(/^data: /, "")
+            line_without_prefix = line.gsub(/^data: /, "").rstrip
+
+            next if line_without_prefix.empty?
+
             json = JSON.parse(line_without_prefix)
 
             break if json.dig("choices", 0, "finish_reason")
