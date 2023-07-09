@@ -45,6 +45,23 @@ ChatgptRb::Conversation.new(api_key: "foobarbaz").ask("Open the pod bay doors, H
 # => "I'm sorry, Dave. I'm afraid I can't do that."
 ```
 
+### Streaming responses
+
+You can configure the client to stream responses instead of waiting for the full response to arrive. To do this, pass a block to the conversation's `#ask` method:
+
+```ruby
+tokens = []
+
+conversation = ChatgptRb::Conversation.new(api_key: "foobarbaz")
+
+conversation.ask("Open the pod bay doors, Hal.") do |token|
+  tokens << token
+end
+
+tokens
+# => ["I", " sorry", ", ", " Dave", ".", " I", "'m", " afraid", " I", " can", "'t", " do", " that", "."]
+```
+
 ## Prompts
 
 You can pass in a custom prompt via via the DSL:
