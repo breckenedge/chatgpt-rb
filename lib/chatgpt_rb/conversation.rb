@@ -5,11 +5,7 @@ require_relative "./dsl/conversation"
 
 module ChatgptRb
   class Conversation
-    include HTTParty
-
-    base_uri "https://api.openai.com"
-
-    attr_accessor :api_key, :model, :functions, :temperature, :max_tokens, :top_p, :frequency_penalty, :presence_penalty, :prompt
+    attr_accessor :api_key, :model, :functions, :temperature, :max_tokens, :top_p, :frequency_penalty, :presence_penalty, :prompt, :base_uri
     attr_reader :messages
 
     # @param api_key [String]
@@ -22,7 +18,8 @@ module ChatgptRb
     # @param presence_penalty [Float]
     # @param messages [Array<Hash>]
     # @param prompt [String, nil] instructions that the model can use to inform its responses, for example: "Act like a sullen teenager."
-    def initialize(api_key: nil, model: "gpt-3.5-turbo", functions: [], temperature: 0.7, max_tokens: 1024, top_p: 1.0, frequency_penalty: 0.0, presence_penalty: 0.0, messages: [], prompt: nil, &configuration)
+    # @param base_uri [String]
+    def initialize(api_key: nil, model: "gpt-3.5-turbo", functions: [], temperature: 0.7, max_tokens: 1024, top_p: 1.0, frequency_penalty: 0.0, presence_penalty: 0.0, messages: [], prompt: nil, base_uri: "https://api.openai.com", &configuration)
       @api_key = api_key
       @model = model
       @functions = functions.each_with_object({}) do |function, hash|
@@ -36,6 +33,7 @@ module ChatgptRb
       @presence_penalty = presence_penalty
       @messages = messages
       @prompt = prompt
+      @base_uri = base_uri
       ChatgptRb::DSL::Conversation.configure(self, &configuration) if block_given?
       @messages << { role: "system", content: prompt } if prompt
     end
@@ -96,8 +94,8 @@ module ChatgptRb
         hash[:functions] = functions.values.map(&:as_json) unless functions.empty?
       end
 
-      response = self.class.post(
-        "/v1/chat/completions",
+      response = HTTParty.post(
+        "#{base_uri}/v1/chat/completions",
         steam_body: block_given?,
         headers: {
           "Content-Type" => "application/json",
