@@ -31,7 +31,7 @@ module ChatgptRb
       @top_p = top_p
       @frequency_penalty = frequency_penalty
       @presence_penalty = presence_penalty
-      @messages = messages
+      @messages = messages.map { |message| message.transform_keys(&:to_sym) }
       @prompt = prompt
       @base_uri = base_uri
       ChatgptRb::DSL::Conversation.configure(self, &configuration) if block_given?
