@@ -41,7 +41,7 @@ OptionParser.new do |opts|
     options[:functions_files] << functions_file
   end
 
-  opts.on("-p", "--prompt PROMPT", "Declare the prompt for your coversation") do |prompt|
+  opts.on("-p", "--prompt PROMPT", "Declare the prompt for your conversation") do |prompt|
     options[:prompt] = prompt
   end
 end.parse!
