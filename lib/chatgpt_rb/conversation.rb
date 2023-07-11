@@ -146,17 +146,17 @@ module ChatgptRb
       error_buffer.each { |e| $stderr.puts("Error: #{e}") }
 
       @messages << if block_given? && streamed_content != ""
-                     { "content" => streamed_content, "role" => streamed_role }
+                     { content: streamed_content, role: streamed_role }
                    elsif block_given? && streamed_arguments != ""
-                     { "role" => "assistant", "content" => nil, "function_call" => { "name" => streamed_function, "arguments" => streamed_arguments } }
+                     { role: "assistant", content: nil, function_call: { "name" => streamed_function, "arguments" => streamed_arguments } }
                    else
-                     response.dig("choices", 0, "message")
+                     response.dig("choices", 0, "message").transform_keys(&:to_sym)
                    end
 
-      if @messages.last["content"]
-        @messages.last["content"]
-      elsif @messages.last["function_call"]
-        function_args = @messages.last["function_call"]
+      if @messages.last[:content]
+        @messages.last[:content]
+      elsif @messages.last[:function_call]
+        function_args = @messages.last[:function_call]
         function_name = function_args.fetch("name")
         arguments = JSON.parse(function_args.fetch("arguments"))
         function = functions[function_name]
