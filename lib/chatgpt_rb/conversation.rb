@@ -109,8 +109,6 @@ module ChatgptRb
       ) do |fragment|
         if block_given?
           fragment.each_line do |line|
-            next if line.nil?
-            next if line == "\n"
             break if line == "data: [DONE]\n"
 
             line_without_prefix = line.gsub(/^data: /, "").rstrip
