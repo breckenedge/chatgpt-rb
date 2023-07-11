@@ -10,15 +10,10 @@ Install this gem via the command line:
 
 ```sh
 gem install chatgpt-rb
-```
-
-## Usage
-
-```sh
 chatgpt-rb -k <Your OpenAI API Key>
 ```
 
-Alternatively, set the `OPEN_AI_KEY` environment variable.
+Alternatively, set an `OPEN_AI_KEY` environment variable to avoid having to enter your key.
 
 To see all usage options:
 
