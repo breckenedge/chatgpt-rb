@@ -29,11 +29,11 @@ OptionParser.new do |opts|
     options[:key] = key
   end
 
-  opts.on("-m", "--model MODEL", "Use the provided MODEL") do |model|
+  opts.on("-m", "--model MODEL", "Use the provided MODEL (Default: #{options[:model]})") do |model|
     options[:model] = model
   end
 
-  opts.on("-b", "--base-uri URI", "Use the provided base URI") do |uri|
+  opts.on("-b", "--base-uri URI", "Use the provided base URI (Default: #{options[:base_uri]})") do |uri|
     options[:base_uri] = uri
   end
 
