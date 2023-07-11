@@ -40,6 +40,10 @@ OptionParser.new do |opts|
   opts.on("-u", "--functions-file FILE", "Add functions defined in FILE to your conversation") do |functions_file|
     options[:functions_files] << functions_file
   end
+
+  opts.on("-p", "--prompt PROMPT", "Declare the prompt for your coversation") do |prompt|
+    options[:prompt] = prompt
+  end
 end.parse!
 
 begin
@@ -57,7 +61,11 @@ begin
                []
              end
 
-  conversation = ChatgptRb::Conversation.new(api_key: options.fetch(:key), model: options.fetch(:model), base_uri: options.fetch(:base_uri), messages:, functions:)
+  if options[:prompt]
+    puts "prompt> ".colorize(:blue) + options[:prompt]
+  end
+
+  conversation = ChatgptRb::Conversation.new(api_key: options.fetch(:key), model: options.fetch(:model), base_uri: options.fetch(:base_uri), messages:, functions:, prompt: options[:prompt])
 
   while message = Reline.readline("me> ".colorize(:red), true) do
     case message.chomp
