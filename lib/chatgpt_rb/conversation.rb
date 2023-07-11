@@ -19,7 +19,7 @@ module ChatgptRb
     # @param messages [Array<Hash>]
     # @param prompt [String, nil] instructions that the model can use to inform its responses, for example: "Act like a sullen teenager."
     # @param base_uri [String]
-    def initialize(api_key: nil, model: "gpt-3.5-turbo", functions: [], temperature: 0.7, max_tokens: 1024, top_p: 1.0, frequency_penalty: 0.0, presence_penalty: 0.0, messages: [], prompt: nil, base_uri: "https://api.openai.com", &configuration)
+    def initialize(api_key: nil, model: "gpt-3.5-turbo", functions: [], temperature: 0.7, max_tokens: 1024, top_p: 1.0, frequency_penalty: 0.0, presence_penalty: 0.0, messages: [], prompt: nil, base_uri: "https://api.openai.com/v1", &configuration)
       @api_key = api_key
       @model = model
       @functions = functions.each_with_object({}) do |function, hash|
@@ -95,7 +95,7 @@ module ChatgptRb
       end
 
       response = HTTParty.post(
-        "#{base_uri}/v1/chat/completions",
+        "#{base_uri}/chat/completions",
         steam_body: block_given?,
         headers: {
           "Content-Type" => "application/json",
