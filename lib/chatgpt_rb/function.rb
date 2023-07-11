@@ -2,11 +2,11 @@ module ChatgptRb
   class Function
     attr_accessor :name, :description, :parameters, :implementation
 
-    # @param name [String]
+    # @param name [String, nil]
     # @param description [String, nil]
     # @param parameters [Array<ChatgptRb::Parameter>]
     # @param implementation [Lambda, nil]
-    def initialize(name:, description: nil, parameters: [], implementation: nil)
+    def initialize(name: nil, description: nil, parameters: [], implementation: nil)
       @name = name
       @description = description
       @parameters = parameters

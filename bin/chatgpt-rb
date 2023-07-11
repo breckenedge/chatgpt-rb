@@ -15,6 +15,7 @@ options = {
   key: ENV["OPEN_AI_KEY"],
   model: "gpt-3.5-turbo",
   base_uri: "https://api.openai.com/v1",
+  functions_files: [],
 }
 
 OptionParser.new do |opts|
@@ -35,10 +36,20 @@ OptionParser.new do |opts|
   opts.on("-b", "--base-uri URI", "Use the provided base URI") do |uri|
     options[:base_uri] = uri
   end
+
+  opts.on("-u", "--functions-file FILE", "Add functions defined in FILE to your conversation") do |functions_file|
+    options[:functions_files] << functions_file
+  end
 end.parse!
 
 begin
-  puts "Type any message to talk with ChatGPT. Type 'exit' to quit. Type 'save <filename>' to save this conversation to a JSON file that can be reloaded later with the `-f` argument."
+  puts "Type any message to talk with ChatGPT. Type '\\help' for a list of commands."
+
+  functions = options[:functions_files].map do |function_file|
+              puts "Loading functions from #{function_file}"
+
+              ChatgptRb::DSL::Conversation.new(ChatgptRb::Conversation.new).instance_eval(File.read(function_file))
+            end
 
   messages = if options[:file]
                JSON.parse(File.read(options[:file])).map { |hash| hash.transform_keys(&:to_sym) }
@@ -46,16 +57,27 @@ begin
                []
              end
 
-  conversation = ChatgptRb::Conversation.new(api_key: options.fetch(:key), model: options.fetch(:model), base_uri: options.fetch(:base_uri), messages:)
+  conversation = ChatgptRb::Conversation.new(api_key: options.fetch(:key), model: options.fetch(:model), base_uri: options.fetch(:base_uri), messages:, functions:)
 
   while message = Reline.readline("me> ".colorize(:red), true) do
     case message.chomp
-    when "exit", "quit", "q", "\\q"
+    when "\\help", "\\h"
+      puts <<~COMMANDS.colorize(:blue)
+        - `\\quit` Exit
+        - `\\save <filename>` Save this conversation to a JSON file that can be reloaded later with the `-f` argument
+        - `\\functions` Get a list of configured functions
+      COMMANDS
+    when "\\q", "\\quit", "\\exit"
       exit
-    when "dump"
+    when "\\dump"
       puts "dump> ".colorize(:blue) + conversation.messages.to_json
-    when /save .+/
-      filename = /save (.+)/.match(message)[1]
+    when "\\functions"
+      puts "available functions:".colorize(:blue)
+      functions.each do |function|
+        puts "- `#{function.name}` #{function.description}".colorize(:blue)
+      end
+    when /^\\save .+/
+      filename = /^\\save (.+)/.match(message)[1]
       File.open(filename, "w") { |f| f.write(conversation.messages.to_json) }
       puts "saved to #{filename} ".colorize(:blue)
     else

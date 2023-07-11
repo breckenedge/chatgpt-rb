@@ -21,7 +21,7 @@ Set the `OPEN_AI_KEY` environment variable, then run the `chatgpt-rb` executable
 ```sh
 export OPEN_AI_KEY=foobarbaz
 chatgpt-rb
-Welcome to ChatGTP. Type any message to talk with ChatGPT. Type 'exit' to quit. Type 'dump' to dump this conversation to JSON.
+Type any message to talk with ChatGPT. Type '\help' for a list of commands.
 me> Open the pod bay doors, Hal.
 ai> I'm sorry, Dave. I'm afraid I can't do that.
 me> exit
@@ -32,6 +32,44 @@ Alternatively, you can store this in a local `.env` file:
 ```sh
 echo "OPEN_AI_KEY=foobarbaz" > .env
 chatgpt-rb
+```
+
+### with Function Declarations
+
+OpenAI's API is capable of calling external user defined functions. The CLI supports loading these functions from a functions definition file.
+
+```sh
+chatgpt-rb -u ./examples/weather.rb
+Type any message to talk with ChatGPT. Type '\help' for a list of commands.
+Loading functions from ./examples/weather.rb
+me> \\functions
+available functions:
+- `get_current_weather` Get the current weather for a given location
+```
+
+Here's an example of a functions file:
+
+```ruby
+# in weather.rb
+function "get_current_weather" do
+  description "Get the current weather for a given location"
+
+  parameter "location" do
+    type "string"
+    description "The location, eg Dallas, Texas"
+    required true
+  end
+
+  parameter "unit" do
+    type "string"
+    enum ["celcius", "fahrenheit"]
+    description "The units to return the temperature in"
+  end
+
+  implementation(->(location:, unit: "celcius") do
+    { temperature: 22, unit: unit || "celsius", description: "Sunny" }
+  end)
+end
 ```
 
 ## Usage
