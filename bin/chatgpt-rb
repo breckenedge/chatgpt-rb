@@ -55,7 +55,9 @@ begin
     when "dump"
       puts "dump> ".colorize(:blue) + conversation.messages.to_json
     when /save .+/
-      File.open(/save (.+)/.match(message)[1], "w") { |f| f.write(conversation.messages.to_json) }
+      filename = /save (.+)/.match(message)[1]
+      File.open(filename, "w") { |f| f.write(conversation.messages.to_json) }
+      puts "saved to #{filename} ".colorize(:blue)
     else
       print("ai> ".colorize(:yellow))
       conversation.ask(message) { |fragment| print(fragment) }
