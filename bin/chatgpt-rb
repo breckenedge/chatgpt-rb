@@ -3,6 +3,7 @@
 require "dotenv/load"
 require "colorize"
 require "reline"
+require "optparse"
 require_relative "./../lib/chatgpt_rb"
 
 begin
@@ -10,10 +11,42 @@ begin
 rescue
 end
 
-begin
-  conversation = ChatgptRb::Conversation.new(api_key: ENV.fetch("OPEN_AI_KEY"), model: ENV.fetch("OPEN_AI_MODEL", "gpt-3.5-turbo"))
+options = {
+  key: ENV["OPEN_AI_KEY"],
+  model: "gpt-3.5-turbo",
+  base_uri: "https://api.openai.com/v1",
+}
 
-  puts "Type any message to talk with ChatGPT. Type 'exit' to quit. Type 'dump' to dump this conversation to JSON."
+OptionParser.new do |opts|
+  opts.banner = "Usage: chatgpt-rb [options]"
+
+  opts.on("-f", "--file FILE", "Load a previous conversation from FILE") do |file|
+    options[:file] = file
+  end
+
+  opts.on("-k", "--api-key KEY", "Use the provided API key for authentication") do |key|
+    options[:key] = key
+  end
+
+  opts.on("-m", "--model MODEL", "Use the provided MODEL") do |model|
+    options[:model] = model
+  end
+
+  opts.on("-b", "--base-uri URI", "Use the provided base URI") do |uri|
+    options[:base_uri] = uri
+  end
+end.parse!
+
+begin
+  puts "Type any message to talk with ChatGPT. Type 'exit' to quit. Type 'save <filename>' to save this conversation to a JSON file that can be reloaded later with the `-f` argument."
+
+  messages = if options[:file]
+               JSON.parse(File.read(options[:file])).map { |hash| hash.transform_keys(&:to_sym) }
+             else
+               []
+             end
+
+  conversation = ChatgptRb::Conversation.new(api_key: options.fetch(:key), model: options.fetch(:model), base_uri: options.fetch(:base_uri), messages:)
 
   while message = Reline.readline("me> ".colorize(:red), true) do
     case message.chomp
@@ -21,6 +54,8 @@ begin
       exit
     when "dump"
       puts "dump> ".colorize(:blue) + conversation.messages.to_json
+    when /save .+/
+      File.open(/save (.+)/.match(message)[1], "w") { |f| f.write(conversation.messages.to_json) }
     else
       print("ai> ".colorize(:yellow))
       conversation.ask(message) { |fragment| print(fragment) }
