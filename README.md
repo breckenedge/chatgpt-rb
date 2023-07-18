@@ -29,7 +29,7 @@ OpenAI's API is capable of calling external user defined functions. The CLI supp
 chatgpt-rb -u ./examples/weather.rb
 Type any message to talk with ChatGPT. Type '\help' for a list of commands.
 Loading functions from ./examples/weather.rb
-me> \\functions
+me> \functions
 available functions:
 - `get_current_weather` Get the current weather for a given location
 ```
