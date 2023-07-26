@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name          = "chatgpt-rb"
-  spec.version       = "0.1.1"
+  spec.version       = "0.1.2"
   spec.authors       = ["Aaron Breckenridge"]
   spec.email         = ["aaron@breckridge.dev"]
   spec.summary       = "A gem for interacting with the ChatGPT API"
