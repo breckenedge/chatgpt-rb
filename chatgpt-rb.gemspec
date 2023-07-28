@@ -1,10 +1,12 @@
+require_relative "./lib/chatgpt_rb/version"
+
 Gem::Specification.new do |spec|
   spec.name          = "chatgpt-rb"
-  spec.version       = "0.1.2"
+  spec.version       = ChatgptRb::VERSION
   spec.authors       = ["Aaron Breckenridge"]
   spec.email         = ["aaron@breckridge.dev"]
   spec.summary       = "A gem for interacting with the ChatGPT API"
-  spec.description   = "Provides libraries for interacting with the ChatGPT API and a CLI program `chatgpt-rb` for live conversations."
+  spec.description   = "Provides libraries for interacting with the ChatGPT API and a CLI program `chatgpt-rb` for live conversations. Supports writing functions in Ruby."
   spec.homepage      = "https://github.com/breckenedge/chatgpt-rb"
   spec.license       = "MIT" # or any other license
   spec.files         = Dir["lib/**/*", "bin/**/*"]
