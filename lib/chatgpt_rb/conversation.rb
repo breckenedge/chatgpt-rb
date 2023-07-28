@@ -35,7 +35,7 @@ module ChatgptRb
       @prompt = prompt
       @base_uri = base_uri
       ChatgptRb::DSL::Conversation.configure(self, &configuration) if block_given?
-      @messages << { role: "system", content: prompt } if prompt
+      @messages.unshift(role: "system", content: prompt) if prompt
     end
 
     # @param content [String]

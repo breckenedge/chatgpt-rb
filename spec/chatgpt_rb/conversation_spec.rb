@@ -3,10 +3,15 @@ require "spec_helper"
 describe ChatgptRb::Conversation do
   context "prompt" do
     let(:prompt) { "Act like a sullen teenager." }
+    let(:convo) { described_class.new(prompt:) }
 
     it "accepts a prompt as an argument" do
-      convo = described_class.new(prompt:)
       expect(convo.prompt).to eq(prompt)
+    end
+
+    it "stores the prompt as the first message" do
+      expect(convo.messages.first.fetch(:role)).to eq("system")
+      expect(convo.messages.first.fetch(:content)).to eq(prompt)
     end
   end
 
@@ -125,6 +130,7 @@ describe ChatgptRb::Conversation do
     convo = described_class.new(prompt:)
     response = convo.ask(question)
     expect(response).to eq(mock_content)
+    expect(convo.messages.first.fetch(:role)).to eq("system")
   end
 
   it "can use a function passed in a configuration block" do
