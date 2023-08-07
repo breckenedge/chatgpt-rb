@@ -49,10 +49,12 @@ end.parse!
 begin
   puts "Type any message to talk with ChatGPT. Type '\\help' for a list of commands."
 
-  functions = options[:functions_files].map do |function_file|
+  functions = options[:functions_files].flat_map do |function_file|
               puts "Loading functions from #{function_file}"
 
-              ChatgptRb::DSL::Conversation.new(ChatgptRb::Conversation.new).instance_eval(File.read(function_file))
+              ChatgptRb::Conversation.new.tap do |conversation|
+                ChatgptRb::DSL::Conversation.new(conversation).instance_eval(File.read(function_file))
+              end.functions.values
             end
 
   messages = if options[:file]
