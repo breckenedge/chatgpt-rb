@@ -23,7 +23,7 @@ chatgpt-rb -h
 
 ### with Function Declarations
 
-OpenAI's API is capable of calling external user defined functions. The CLI supports loading these functions from a functions definition file.
+OpenAI's API is capable of calling external user defined functions. The CLI supports loading these functions from a functions definition file. See the [examples/functions.rb](examples/functions.rb) file for more in-depth examples.
 
 ```sh
 chatgpt-rb -u ./examples/functions.rb
