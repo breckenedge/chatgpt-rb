@@ -22,11 +22,23 @@ describe ChatgptRb::DSL::Conversation do
             description "The location, eg Dallas, TX"
             required true
           end
-          implementation ->() { nil }
+          implementation(->(location:) { nil })
+        end
+
+        function "get_stock_price" do
+          description "Get the current price for a given stock"
+          parameter "symbol" do
+            type "string"
+            description "The stock symbol, for example: 'SPX' or 'APPL'"
+            required true
+          end
+          implementation(->(symbol:) { 100 })
         end
       end
       expect(convo.functions["get_current_weather"].name).to eq("get_current_weather")
       expect(convo.functions["get_current_weather"].parameters.first.name).to eq("location")
+      expect(convo.functions["get_stock_price"].name).to eq("get_stock_price")
+      expect(convo.functions["get_stock_price"].parameters.first.name).to eq("symbol")
     end
   end
 end
