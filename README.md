@@ -26,9 +26,9 @@ chatgpt-rb -h
 OpenAI's API is capable of calling external user defined functions. The CLI supports loading these functions from a functions definition file.
 
 ```sh
-chatgpt-rb -u ./examples/weather.rb
+chatgpt-rb -u ./examples/functions.rb
 Type any message to talk with ChatGPT. Type '\help' for a list of commands.
-Loading functions from ./examples/weather.rb
+Loading functions from ./examples/functions.rb
 me> \functions
 available functions:
 - `get_current_weather` Get the current weather for a given location
