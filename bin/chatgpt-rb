@@ -6,11 +6,6 @@ require "reline"
 require "optparse"
 require_relative "./../lib/chatgpt_rb"
 
-begin
-  stty_save = `stty -g`.chomp
-rescue
-end
-
 options = {
   key: ENV["OPEN_AI_KEY"],
   model: "gpt-3.5-turbo",
@@ -47,6 +42,8 @@ OptionParser.new do |opts|
 end.parse!
 
 begin
+  stty_save = `stty -g`.chomp
+
   puts "Type any message to talk with ChatGPT. Type '\\help' for a list of commands."
 
   functions = options[:functions_files].flat_map do |function_file|
