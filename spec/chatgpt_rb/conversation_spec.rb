@@ -169,8 +169,8 @@ describe ChatgptRb::Conversation do
                     description: "The units to return the temperature in",
                   },
                 },
+                required: ["location"],
               },
-              required: ["location"],
             },
           ],
         },
@@ -247,10 +247,10 @@ describe ChatgptRb::Conversation do
                     type: "string",
                     description: "The units to return the temperature in",
                   }
-                }
+                },
+                required: ["location"],
               },
-              required: ["location"],
-            }
+            },
           ]
         }
       )
