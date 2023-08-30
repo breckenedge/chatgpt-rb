@@ -147,6 +147,8 @@ module ChatgptRb
         end
       end
 
+      raise APIError.new, response.body unless response.success?
+
       error_buffer.each { |e| $stderr.puts("Error: #{e}") }
 
       @messages << if block_given? && streamed_content != ""
@@ -172,4 +174,7 @@ module ChatgptRb
       end
     end
   end
+
+  # Raised when the API responds with an error.
+  class APIError < StandardError; end
 end
