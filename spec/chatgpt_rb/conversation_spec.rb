@@ -21,7 +21,20 @@ describe ChatgptRb::Conversation do
         {
           name: "get_current_weather",
           description: "",
-          parameters: {},
+          parameters: {
+            type: "object",
+            properties: {
+              location: {
+                type: "string",
+                description: "",
+              },
+              unit: {
+                type: "string",
+                enum: ["celcius", "fahrenheit"],
+              },
+            },
+            required: [:location]
+          },
           implementation: ->() { nil },
         },
       ])
