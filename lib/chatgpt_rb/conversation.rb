@@ -26,10 +26,10 @@ module ChatgptRb
         func = if function.is_a?(ChatgptRb::Function)
                  function
                else
-                 parameters = function.fetch(:parameters).fetch(:properties).map do |name, definition|
+                 parameters = function.dig(:parameters, :properties).map do |name, definition|
                    required = function.dig(:parameters, :required)&.include?(name)
                    ChatgptRb::Parameter.new(name:, required:, **definition)
-                 end
+                 end || []
                  ChatgptRb::Function.new(parameters:, **function.except(:parameters))
                end
         hash[func.name] = func
