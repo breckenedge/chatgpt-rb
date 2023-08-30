@@ -118,6 +118,7 @@ conversation = ChatgptRb::Conversation.new(api_key: "foobarbaz") do
     parameter  "location" do
       type "string"
       description "The location, eg Dallas, Texas"
+      required true
     end
 
     parameter "unit" do
@@ -155,7 +156,7 @@ functions = [
           enum: ["celcius", "fahrenheit"],
         },
       },
-      required: ["location"],
+      required: [:location],
     },
     implementation: ->(location:, unit: "celcius") {
       # Your code goes here. The result of this block gets passed back to ChatGPT as JSON.
@@ -165,6 +166,6 @@ functions = [
 ]
 
 conversation = ChatgptRb::Conversation.new(api_key: "foobarbaz", functions: functions)
-converastion.ask("What's the weather like in Pheonix today?")
+conversation.ask("What's the weather like in Pheonix today?")
 # => "The weather in Pheonix, AZ is 22 degrees and sunny."
 ```

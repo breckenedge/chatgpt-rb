@@ -23,7 +23,15 @@ module ChatgptRb
       @api_key = api_key
       @model = model
       @functions = functions.each_with_object({}) do |function, hash|
-        func = function.is_a?(ChatgptRb::Function) ? function : ChatgptRb::Function.new(**function)
+        func = if function.is_a?(ChatgptRb::Function)
+                 function
+               else
+                 parameters = function.dig(:parameters, :properties).map do |name, definition|
+                   required = function.dig(:parameters, :required)&.include?(name)
+                   ChatgptRb::Parameter.new(name:, required:, **definition)
+                 end
+                 ChatgptRb::Function.new(parameters:, **function.except(:parameters))
+               end
         hash[func.name] = func
       end
       @temperature = temperature
