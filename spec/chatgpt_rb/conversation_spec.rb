@@ -41,6 +41,17 @@ describe ChatgptRb::Conversation do
       expect(convo.functions["get_current_weather"].name).to eq("get_current_weather")
     end
 
+    it "takes functions with no parameters" do
+      convo = described_class.new(functions: [
+        {
+          name: "get_current_weather",
+          description: "",
+          implementation: ->() { nil },
+        },
+      ])
+      expect(convo.functions["get_current_weather"].name).to eq("get_current_weather")
+    end
+
     it "accepts functions passed as initialization arguments" do
       convo = described_class.new(functions: [
         ChatgptRb::Function.new(
