@@ -26,7 +26,7 @@ module ChatgptRb
         func = if function.is_a?(ChatgptRb::Function)
                  function
                else
-                 parameters = function.dig(:parameters, :properties).map do |name, definition|
+                 parameters = function.fetch(:parameters).fetch(:properties).map do |name, definition|
                    required = function.dig(:parameters, :required)&.include?(name)
                    ChatgptRb::Parameter.new(name:, required:, **definition)
                  end
