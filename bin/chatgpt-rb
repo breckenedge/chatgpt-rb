@@ -11,6 +11,7 @@ options = {
   model: "gpt-3.5-turbo",
   base_uri: "https://api.openai.com/v1",
   functions_files: [],
+  temperature: 0.7,
 }
 
 OptionParser.new do |opts|
@@ -39,6 +40,10 @@ OptionParser.new do |opts|
   opts.on("-p", "--prompt PROMPT", "Declare the PROMPT for your conversation") do |prompt|
     options[:prompt] = prompt
   end
+
+  opts.on("-t", "--temperature TEMPERATURE", "Set the temperature for the conversation") do |temperature|
+    options[:temperature] = temperature.to_f
+  end
 end.parse!
 
 begin
@@ -61,10 +66,11 @@ begin
              end
 
   if options[:prompt]
+    options[:prompt] = File.exist?(options[:prompt]) ? File.read(options[:prompt]) : options[:prompt]
     puts "prompt> ".colorize(:blue) + options[:prompt]
   end
 
-  conversation = ChatgptRb::Conversation.new(api_key: options.fetch(:key), model: options.fetch(:model), base_uri: options.fetch(:base_uri), messages:, functions:, prompt: options[:prompt])
+  conversation = ChatgptRb::Conversation.new(api_key: options.fetch(:key), model: options.fetch(:model), base_uri: options.fetch(:base_uri), messages:, functions:, prompt: options[:prompt], temperature: options.fetch(:temperature))
 
   commands = [
     {
