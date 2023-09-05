@@ -1,3 +1,7 @@
+# 0.1.6
+
+- Add temperature to CLI arguments
+
 # 0.1.5
 
 - Allow declaring functions that take no parameters.
