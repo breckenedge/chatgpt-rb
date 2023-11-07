@@ -5,7 +5,7 @@ require_relative "./dsl/conversation"
 
 module ChatgptRb
   class Conversation
-    attr_accessor :api_key, :model, :functions, :temperature, :max_tokens, :top_p, :frequency_penalty, :presence_penalty, :prompt, :base_uri
+    attr_accessor :api_key, :model, :functions, :temperature, :max_tokens, :top_p, :frequency_penalty, :presence_penalty, :prompt, :base_uri, :json
     attr_reader :messages
 
     # @param api_key [String]
@@ -18,8 +18,9 @@ module ChatgptRb
     # @param presence_penalty [Float]
     # @param messages [Array<Hash>]
     # @param prompt [String, nil] instructions that the model can use to inform its responses, for example: "Act like a sullen teenager."
+    # @param json [true, false] whether or not ChatGPT should respond using only JSON objects
     # @param base_uri [String]
-    def initialize(api_key: nil, model: "gpt-3.5-turbo", functions: [], temperature: 0.7, max_tokens: 1024, top_p: 1.0, frequency_penalty: 0.0, presence_penalty: 0.0, messages: [], prompt: nil, base_uri: "https://api.openai.com/v1", &configuration)
+    def initialize(api_key: nil, model: "gpt-3.5-turbo", functions: [], temperature: 0.7, max_tokens: 1024, top_p: 1.0, frequency_penalty: 0.0, presence_penalty: 0.0, messages: [], prompt: nil, base_uri: "https://api.openai.com/v1", json: false, &configuration)
       @api_key = api_key
       @model = model
       @functions = functions.each_with_object({}) do |function, hash|
@@ -42,6 +43,7 @@ module ChatgptRb
       @messages = messages.map { |message| message.transform_keys(&:to_sym) }
       @prompt = prompt
       @base_uri = base_uri
+      @json = json
       ChatgptRb::DSL::Conversation.configure(self, &configuration) if block_given?
       @messages.unshift(role: "system", content: prompt) if prompt
     end
@@ -100,6 +102,7 @@ module ChatgptRb
         stream: block_given?,
       }.tap do |hash|
         hash[:functions] = functions.values.map(&:as_json) unless functions.empty?
+        hash[:response_format] = { type: :json_object } if json
       end
 
       response = HTTParty.post(
@@ -160,7 +163,7 @@ module ChatgptRb
                    end
 
       if @messages.last[:content]
-        @messages.last[:content]
+        json ? JSON.parse(@messages.last[:content]) : messages.last[:content]
       elsif @messages.last[:function_call]
         function_args = @messages.last[:function_call]
         function_name = function_args.fetch("name")

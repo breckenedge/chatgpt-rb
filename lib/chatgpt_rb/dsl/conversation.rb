@@ -5,7 +5,7 @@ require_relative "../function"
 module ChatgptRb
   module DSL
     class Conversation < Base
-      supported_fields %i[api_key model functions temperature max_tokens top_p frequency_penalty presence_penalty prompt]
+      supported_fields %i[api_key model functions temperature max_tokens top_p frequency_penalty presence_penalty prompt json]
 
       # @param name [String] the name of the function
       # @param configuration [Block]

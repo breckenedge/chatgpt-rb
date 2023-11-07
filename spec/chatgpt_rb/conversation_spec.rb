@@ -15,6 +15,55 @@ describe ChatgptRb::Conversation do
     end
   end
 
+  it "conducts conversations using only JSON responses" do
+    mock_response = {
+      id: "chatcmpl-7a6l2cVOW7rY9YescrcLZnxImdMYN",
+      object: "chat.completion",
+      created: 1688840140,
+      model: "gpt-3.5-turbo-1106",
+      choices: [
+        {
+          index: 0,
+          message: {
+            role: "assistant",
+            content: { "response" => "I'm just a program, so I don't have feelings, but I'm here and ready to help you!" }.to_json,
+          },
+          finish_reason: "stop",
+        }
+      ],
+      usage: {
+        prompt_tokens: 12,
+        completion_tokens: 47,
+        total_tokens: 59,
+      },
+    }
+    stub_request(:post, "https://api.openai.com/v1/chat/completions")
+      .with(body: {
+        model: "gpt-3.5-turbo-1106",
+        messages: [
+          {
+            role: "system",
+            content: "Respond using only JSON."
+          },
+          {
+            role: "user",
+            content: "How are you today?"
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 1024,
+        top_p: 1.0,
+        frequency_penalty: 0.0,
+        presence_penalty: 0.0,
+        stream: false,
+        response_format: { type: "json_object" }
+      }.to_json)
+      .to_return(headers: { "Content-Type" => "application/json" }, body: mock_response.to_json)
+
+    convo = described_class.new(json: true, prompt: "Respond using only JSON.", model: "gpt-3.5-turbo-1106")
+    expect(convo.ask("How are you today?")).to eq({ "response" => "I'm just a program, so I don't have feelings, but I'm here and ready to help you!" })
+  end
+
   context "functions" do
     it "converts functions passed as Hash objects to ChatgptRb::Function objects" do
       convo = described_class.new(functions: [
