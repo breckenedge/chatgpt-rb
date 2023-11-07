@@ -12,6 +12,15 @@ describe ChatgptRb::DSL::Conversation do
     end
   end
 
+  it "supports conversations using json mode" do
+    convo = ChatgptRb::Conversation.new do
+      prompt "Respond using only JSON"
+      json true
+    end
+
+    expect(convo.json).to be_truthy
+  end
+
   context "functions" do
     it "accepts functions passed via the configuration DSL" do
       convo = ChatgptRb::Conversation.new do
