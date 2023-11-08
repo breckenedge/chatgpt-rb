@@ -84,6 +84,7 @@ module ChatgptRb
       streamed_arguments = ""
       streamed_role = ""
       streamed_function = ""
+      streamed_tool_calls = ""
       error_buffer = []
 
       body = {
@@ -139,6 +140,8 @@ module ChatgptRb
               streamed_content << content
             elsif arguments = json.dig("choices", 0, "delta", "function_call", "arguments")
               streamed_arguments << arguments
+            elsif tool_calls = json.dig("choices", 0, "delta", "tool_calls")
+              streamed_tool_calls << tool_calls
             end
           rescue => e
             error_buffer << "Error: #{e}"
@@ -154,6 +157,8 @@ module ChatgptRb
                      { content: streamed_content, role: streamed_role }
                    elsif block_given? && streamed_arguments != ""
                      { role: "assistant", content: nil, function_call: { "name" => streamed_function, "arguments" => streamed_arguments } }
+                   elsif block_given? && streamed_tool_calls != ""
+                     { role: "assistant", content: nil, tool_calls: streamed_tool_calls }
                    else
                      response.dig("choices", 0, "message").transform_keys(&:to_sym)
                    end
