@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.summary       = "A gem for interacting with the ChatGPT API"
   spec.description   = "Provides libraries for interacting with the ChatGPT API and a CLI program `chatgpt-rb` for live conversations. Supports writing tools (functions) in Ruby and streaming responses."
   spec.homepage      = "https://github.com/breckenedge/chatgpt-rb"
-  spec.license       = "MIT" # or any other license
+  spec.license       = "MIT"
   spec.files         = Dir["lib/**/*", "bin/**/*"]
   spec.require_paths = ["lib"]
   spec.executables << "chatgpt-rb"
