@@ -230,24 +230,27 @@ describe ChatgptRb::Conversation do
           frequency_penalty: 0.0,
           presence_penalty: 0.0,
           stream: false,
-          functions: [
+          tools: [
             {
-              name: "get_current_weather",
-              description: "Get the current weather for a given location",
-              parameters: {
-                type: "object",
-                properties: {
-                  location: {
-                    type: "string",
-                    description: "The location, eg Dallas, Texas",
+              type: "function",
+              function: {
+                name: "get_current_weather",
+                description: "Get the current weather for a given location",
+                parameters: {
+                  type: "object",
+                  properties: {
+                    location: {
+                      type: "string",
+                      description: "The location, eg Dallas, Texas",
+                    },
+                    unit: {
+                      enum: ["celcius", "fahrenheit"],
+                      type: "string",
+                      description: "The units to return the temperature in",
+                    },
                   },
-                  unit: {
-                    enum: ["celcius", "fahrenheit"],
-                    type: "string",
-                    description: "The units to return the temperature in",
-                  },
+                  required: ["location"],
                 },
-                required: ["location"],
               },
             },
           ],
@@ -266,10 +269,16 @@ describe ChatgptRb::Conversation do
               message: {
                 role: "assistant",
                 content: nil,
-                function_call: {
-                  name: "get_current_weather",
-                  arguments: "{\n  \"location\": \"Phoenix\"\n}"
-                }
+                tool_calls: [
+                  {
+                    type: "function",
+                    id: "1234",
+                    function: {
+                      name: "get_current_weather",
+                      arguments: "{\n  \"location\": \"Phoenix\"\n}",
+                    },
+                  },
+                ],
               },
               finish_reason: "function_call"
             }
@@ -292,13 +301,20 @@ describe ChatgptRb::Conversation do
             {
               role: "assistant",
               content: nil,
-              function_call: {
-                name: "get_current_weather",
-                arguments: "{\n  \"location\": \"Phoenix\"\n}",
-              },
+              tool_calls: [
+                {
+                  type: "function",
+                  id: "1234",
+                  function: {
+                    name: "get_current_weather",
+                    arguments: "{\n  \"location\": \"Phoenix\"\n}",
+                  },
+                },
+              ],
             },
             {
-              role: "function",
+              role: "tool",
+              tool_call_id: "1234",
               name: "get_current_weather",
               content: "{\"temperature\":22,\"unit\":\"celcius\",\"description\":\"Sunny\"}",
             }
@@ -309,27 +325,30 @@ describe ChatgptRb::Conversation do
           frequency_penalty: 0.0,
           presence_penalty: 0.0,
           stream: false,
-          functions: [
+          tools: [
             {
-              name: "get_current_weather",
-              description: "Get the current weather for a given location",
-              parameters: {
-                type: "object",
-                properties: {
-                  location: {
-                    type: "string",
-                    description: "The location, eg Dallas, Texas",
+              type: "function",
+              function: {
+                name: "get_current_weather",
+                description: "Get the current weather for a given location",
+                parameters: {
+                  type: "object",
+                  properties: {
+                    location: {
+                      type: "string",
+                      description: "The location, eg Dallas, Texas",
+                    },
+                    unit: {
+                      enum: ["celcius", "fahrenheit"],
+                      type: "string",
+                      description: "The units to return the temperature in",
+                    }
                   },
-                  unit: {
-                    enum: ["celcius", "fahrenheit"],
-                    type: "string",
-                    description: "The units to return the temperature in",
-                  }
+                  required: ["location"],
                 },
-                required: ["location"],
               },
             },
-          ]
+          ],
         }
       )
       .to_return(

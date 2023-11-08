@@ -74,10 +74,7 @@ module ChatgptRb
     # Ensure that each function's argument declarations conform to the JSON Schema
     # See https://github.com/voxpupuli/json-schema/
     def validate_functions!
-      metaschema = JSON::Validator.validator_for_name("draft4").metaschema
-      functions.values.each do |function|
-        raise ArgumentError, "Invalid function declaration for #{function.name}: #{function.as_json}" unless JSON::Validator.validate(metaschema, function.as_json[:function])
-      end
+      functions.values.each(&:validate!)
     end
 
     def get_next_response(&block)
