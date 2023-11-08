@@ -1,6 +1,11 @@
 require "spec_helper"
 
 describe ChatgptRb::Conversation do
+  it "takes a seed argument" do
+    subject = described_class.new(seed: 1)
+    expect(subject.seed).to eq(1)
+  end
+
   context "prompt" do
     let(:prompt) { "Act like a sullen teenager." }
     let(:convo) { described_class.new(prompt:) }

@@ -21,6 +21,14 @@ describe ChatgptRb::DSL::Conversation do
     expect(convo.json).to be_truthy
   end
 
+  it "supports setting the seed" do
+    convo = ChatgptRb::Conversation.new do
+      seed 123
+    end
+
+    expect(convo.seed).to eq(123)
+  end
+
   context "functions" do
     it "accepts functions passed via the configuration DSL" do
       convo = ChatgptRb::Conversation.new do
