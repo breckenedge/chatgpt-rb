@@ -16,16 +16,19 @@ module ChatgptRb
     # @return [Hash]
     def as_json
       {
-        name:,
-        description:,
-        parameters: {
-          type: "object",
-          properties: parameters.each_with_object({}) do |parameter, hash|
-            hash[parameter.name] = parameter.as_json
-          end,
-          required: parameters.select(&:required?).map(&:name),
-        },
-      }.compact
+        type: "function",
+        function: {
+          name:,
+          description:,
+          parameters: {
+            type: "object",
+            properties: parameters.each_with_object({}) do |parameter, hash|
+              hash[parameter.name] = parameter.as_json
+            end,
+            required: parameters.select(&:required?).map(&:name),
+          },
+        }.compact
+      }
     end
   end
 end

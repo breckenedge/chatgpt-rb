@@ -111,7 +111,7 @@ conversation = ChatgptRb::Conversation.new(api_key: "foobarbaz", prompt: "You're
 This library supports the OpenAI ChatGPT function calling syntax, which you can either pass in via the configuration DSL:
 
 ```ruby
-conversation = ChatgptRb::Conversation.new(api_key: "foobarbaz") do
+conversation = ChatgptRb::Conversation.new(api_key: ENV.fetch("OPEN_AI_KEY")) do
   function "get_current_weather" do
     description "Get the current weather for a given location"
 

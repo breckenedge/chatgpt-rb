@@ -76,7 +76,7 @@ module ChatgptRb
     def validate_functions!
       metaschema = JSON::Validator.validator_for_name("draft4").metaschema
       functions.values.each do |function|
-        raise ArgumentError, "Invalid function declaration for #{function.name}: #{function.as_json}" unless JSON::Validator.validate(metaschema, function.as_json)
+        raise ArgumentError, "Invalid function declaration for #{function.name}: #{function.as_json}" unless JSON::Validator.validate(metaschema, function.as_json[:function])
       end
     end
 
@@ -99,7 +99,7 @@ module ChatgptRb
         presence_penalty:,
         stream: block_given?,
       }.tap do |hash|
-        hash[:functions] = functions.values.map(&:as_json) unless functions.empty?
+        hash[:tools] = functions.values.map(&:as_json) unless functions.empty?
         hash[:response_format] = { type: :json_object } if json
         hash[:seed] = seed unless seed.nil?
       end
@@ -163,6 +163,22 @@ module ChatgptRb
 
       if @messages.last[:content]
         json ? JSON.parse(@messages.last[:content]) : @messages.last[:content]
+      elsif @messages.last[:tool_calls]
+        @messages.last[:tool_calls].each do |tool_call|
+          next unless tool_call.fetch("type") == "function"
+          function_name = tool_call.dig("function", "name")
+          function_args = JSON.parse(tool_call.dig("function", "arguments"))
+          function = functions.fetch(function_name)
+          content = function.implementation.call(**function_args.transform_keys(&:to_sym))
+          @messages << {
+            role: "tool",
+            tool_call_id: tool_call.fetch("id"),
+            name: function_name,
+            content: content.to_json,
+          }
+        end
+
+        get_next_response(&block)
       elsif @messages.last[:function_call]
         function_args = @messages.last[:function_call]
         function_name = function_args.fetch("name")
