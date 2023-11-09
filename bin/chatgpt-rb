@@ -14,6 +14,8 @@ options = {
   temperature: 0.7,
 }
 
+SAVE_COMMAND_PATTERN = /sa?v?e? (.+)/.freeze
+
 OptionParser.new do |opts|
   opts.banner = "Usage: chatgpt-rb [options]"
 
@@ -74,32 +76,36 @@ begin
 
   commands = [
     {
-      names: ["s", "save"],
+      names: ["s", "save", SAVE_COMMAND_PATTERN],
       description: "Save this conversation to a JSON file that can be reloaded later with the `-f` argument",
-      implementation: ->() {
-        filename = /^\\save (.+)/.match(message)[1]
-        File.open(filename, "w") { |f| f.write(conversation.messages.to_json) }
-        puts "saved to #{filename} ".colorize(:blue)
+      implementation: ->(message) {
+        filename = if message =~ SAVE_COMMAND_PATTERN
+          SAVE_COMMAND_PATTERN.match(message)[1]
+        else
+          "conversation_#{Time.now.iso8601}.json"
+        end
+        File.open(filename, "w") { |f| f.write(conversation.to_json) }
+        puts "saved to #{filename}".colorize(:blue)
       }
     },
     {
       names: ["q", "quit", "exit"],
       description: "Exit the program",
-      implementation: ->() {
+      implementation: ->(_) {
         exit
       }
     },
     {
       names: ["d", "dump"],
       description: "Print out all messages in this converastion.",
-      implementation: ->() {
+      implementation: ->(_) {
         puts "dump> ".colorize(:blue) + conversation.messages.to_json
       }
     },
     {
       names: ["f", "functions"],
       description: "List all available functions.",
-      implementation: ->() {
+      implementation: ->(_) {
         puts "available functions:".colorize(:blue)
         functions.each do |function|
           puts "- `#{function.name}` #{function.description}".colorize(:blue)
@@ -109,7 +115,7 @@ begin
     {
       names: ["h", "help"],
       description: "List all commands and their description",
-      implementation: ->() {
+      implementation: ->(_) {
         puts commands.map { |command| "  - #{command[:names].map { |str| "`\\#{str}`".colorize(:yellow) }.join(", ")}: #{command[:description].colorize(:blue)}" }.join("\n")
       }
     }
@@ -117,8 +123,8 @@ begin
 
   while message = Reline.readline("me> ".colorize(:red), true) do
     input = message.chomp
-    if (command = commands.find { |command| command[:names].any? { |name| "\\#{name}" == input } })
-      command[:implementation].call
+    if (command = commands.find { |command| command[:names].any? { |name| name.is_a?(Regexp) ? input =~ name : "\\#{name}" == input } })
+      command[:implementation].call(message)
     else
       print("ai> ".colorize(:yellow))
       conversation.ask(message) { |fragment| print(fragment) }

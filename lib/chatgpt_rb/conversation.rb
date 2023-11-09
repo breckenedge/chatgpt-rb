@@ -1,3 +1,4 @@
+require "json"
 require "httparty"
 require "json-schema"
 require_relative "./function"
@@ -48,6 +49,10 @@ module ChatgptRb
       @seed = seed
       ChatgptRb::DSL::Conversation.configure(self, &configuration) if block_given?
       @messages.unshift(role: "system", content: prompt) if prompt
+    end
+
+    def to_json
+      messages.to_json
     end
 
     # @param content [String]
