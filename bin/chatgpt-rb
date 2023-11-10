@@ -14,7 +14,7 @@ options = {
   temperature: 0.7,
 }
 
-SAVE_COMMAND_PATTERN = /sa?v?e? (.+)/.freeze
+SAVE_COMMAND_PATTERN = /^\\sa?v?e? (.+)/.freeze
 
 OptionParser.new do |opts|
   opts.banner = "Usage: chatgpt-rb [options]"
